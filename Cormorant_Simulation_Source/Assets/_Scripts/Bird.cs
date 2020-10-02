@@ -5,6 +5,7 @@ using UnityEngine;
 public class Bird : MonoBehaviour
 {
     public enum BirdState {
+        SearchingMate,
         SearchingNest,
         BuildingNest,
         DamagingTree,
@@ -20,6 +21,11 @@ public class Bird : MonoBehaviour
     public float nestBuildingTime = 2.0f;
     public float damagingTime = 1.0f;
 
+    public GameObject birdBabyPrefab;
+    public Vector2 birthInterval;
+    
+    private float timeLeftToBaby;
+
     private GameObject nest;
     private BirdState currentState;
 
@@ -30,8 +36,11 @@ public class Bird : MonoBehaviour
     private bool startedDamaginTree = false;
     //private bool chosenTargetPos = false;
 
+    public bool hasMate = false;
+    private GameObject mate;
+
     void Start () {
-        UpdateState (BirdState.SearchingNest);
+        UpdateState (BirdState.SearchingMate);
     }
 
     void Update () {
@@ -49,9 +58,20 @@ public class Bird : MonoBehaviour
             case BirdState.FlyingRandom:
                 DoFlyingRandom ();
                 break;
+            case BirdState.SearchingMate:
+                DoSearchingMate ();
+                break;
             default:
                 Debug.Log("Reached unkown state");
                 break;
+        }
+
+        if (hasMate) {
+            timeLeftToBaby -= Time.deltaTime;
+            if (timeLeftToBaby <= 0.0f) {
+                timeLeftToBaby = Random.Range (birthInterval.x, birthInterval.y);
+                Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity);
+            }
         }
 
     }
@@ -85,6 +105,53 @@ public class Bird : MonoBehaviour
     private void DoDamagingTree () {
         if (!startedDamaginTree) 
             StartCoroutine (DamageTree ());
+    }
+
+    private void DoSearchingMate () {
+        if (!hasMate) {
+            FindMate ();
+            if (!hasMate) {
+                UpdateState (BirdState.SearchingNest);
+                return;
+            }
+        }
+
+    }
+
+    private void FindMate () {
+        GameObject[] birdObjects = GameObject.FindGameObjectsWithTag("Bird");
+
+        List<GameObject> candidates = new List<GameObject> ();
+
+        foreach (GameObject birdObject in birdObjects) {
+            Bird bird = birdObject.GetComponent<Bird> ();
+            if (bird != this && !bird.hasMate)
+                candidates.Add(birdObject);
+        }
+
+        if (candidates.Count == 0) 
+            return;
+
+        GameObject newMate = candidates[Random.Range(0, candidates.Count)];
+        
+        UpdateMate (newMate);
+        newMate.GetComponent<Bird> ().UpdateMate (this.gameObject, nest);
+
+        //Debug.Log ("Mated: " + this.gameObject + " with " + newMate);
+    }
+
+    public void UpdateMate (GameObject newMate) {
+        hasMate = true;
+        mate = newMate;
+        ChooseNest ();
+        UpdateState (BirdState.SearchingNest);
+    }
+
+    public void UpdateMate (GameObject newMate, GameObject newNest) {
+        hasMate = true;
+        mate = newMate;
+        nest = newNest;
+        UpdateState (BirdState.SearchingNest);
     }
 
     private IEnumerator DamageTree () {
@@ -152,6 +219,9 @@ public class Bird : MonoBehaviour
             case BirdState.FlyingRandom:
                 SetStateToFlyingRandom();
                 break;
+            case BirdState.SearchingMate:
+                
+                break;
             default:
                 Debug.Log("Reached unkown state");
                 break;
@@ -176,17 +246,25 @@ public class Bird : MonoBehaviour
     private void ChooseNest () {
         GameObject[] treeObjects = GameObject.FindGameObjectsWithTag("Tree");
 
-        // TODO: What if there are no (healthy) trees left?????
-
-        GameObject chosen = treeObjects[0];
+        GameObject chosen = null;
         foreach (GameObject treeObject in treeObjects) {
-            float distToChosen = Distance (gameObject.transform.position, chosen.transform.position);
-            float distToCurTree = Distance (gameObject.transform.position, treeObject.transform.position);
-            if (distToCurTree < distToChosen)
-                chosen = treeObject; 
+            //Debug.Log (gameObject.name + " is choosing nest. " + treeObject.name + " has nest: " + treeObject.GetComponent<Tree> ().hasNest);
+            if (chosen == null)
+                chosen = treeObject;
+            else if (!treeObject.GetComponent<Tree> ().willHaveNest) {
+                float distToChosen = Distance (gameObject.transform.position, chosen.transform.position);
+                float distToCurTree = Distance (gameObject.transform.position, treeObject.transform.position);
+                if (distToCurTree < distToChosen)
+                    chosen = treeObject; 
+            }
         }
 
+        if (chosen == null)
+            return;
+
         nest = chosen;
+        nest.GetComponent<Tree> ().willHaveNest = true;
+        //Debug.Log (gameObject.name + " chose nest: " + nest.name);
     }
 
 

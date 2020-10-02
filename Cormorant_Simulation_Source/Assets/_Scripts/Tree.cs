@@ -19,6 +19,7 @@ public class Tree : MonoBehaviour
     private float health = 100.0f; 
     private TreeState currentState;
     private bool hasNest = false;
+    public bool willHaveNest = false;
 
 
     void Start () {

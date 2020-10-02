@@ -129,6 +129,9 @@ MonoBehaviour:
   spriteRenderer: {fileID: 1660590464442506761}
   searchingNestColor: {r: 0, g: 0, b: 0, a: 1}
   damagingTreeColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
-  speed: 1
+  speed: 3
   nestBuildingTime: 2
   damagingTime: 1
+  birdBabyPrefab: {fileID: 1660590465228684768}
+  birthInterval: {x: 4.58, y: 9.76}
+  hasMate: 0
