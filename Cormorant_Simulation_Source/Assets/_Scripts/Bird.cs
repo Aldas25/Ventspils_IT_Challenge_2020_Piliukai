@@ -30,6 +30,7 @@ public class Bird : MonoBehaviour
     private float timeLeftToBirth;
     public int childrenPerParentNum;
     private int leftChildren;
+    private bool startedGivingBirth = false;
 
     private GameObject nest;
     private BirdState currentState;
@@ -46,12 +47,23 @@ public class Bird : MonoBehaviour
 
     public bool tempIfHasPar = false;
 
+    private SimulationManager simulationManager;
+
+    public bool active = true;
+
+    void Awake () {
+        simulationManager = GameObject.FindGameObjectWithTag ("GameController").GetComponent<SimulationManager> ();
+    }
+
     void Start () {
         if (!tempIfHasPar)
             UpdateState (BirdState.SearchingMate);
     }
 
     void Update () {
+
+        if (!active)
+            return;
 
         switch(currentState) {
             case BirdState.Baby:
@@ -80,9 +92,10 @@ public class Bird : MonoBehaviour
         if (hasMate && leftChildren > 0) {
             timeLeftToBirth -= Time.deltaTime;
             if (timeLeftToBirth <= 0.0f) {
+                startedGivingBirth = true;
                 leftChildren--;
                 timeLeftToBirth = timeToBirth;
-                GameObject birdBaby = Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity);
+                GameObject birdBaby = Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity, simulationManager.birdInstantiateObject);
                 Bird birdComponent = birdBaby.GetComponent<Bird> ();
                 birdComponent.UpdateState (BirdState.Baby);
                 birdComponent.hasMate = false;
@@ -91,6 +104,12 @@ public class Bird : MonoBehaviour
             }
         }
 
+    }
+
+    public void UpdateChildrenPerParNum (int newVal) {
+        childrenPerParentNum = newVal;
+        if (!startedGivingBirth)
+            leftChildren = childrenPerParentNum;
     }
 
     private void DoBeingBaby (float timePast) {
@@ -300,9 +319,13 @@ public class Bird : MonoBehaviour
 
 
     private Vector2 GetRandomPoint () {
+        float minBoundsX = simulationManager.xBounds.x;
+        float maxBoundsX = simulationManager.xBounds.y;
+        float minBoundsY = simulationManager.yBounds.x;
+        float maxBoundsY = simulationManager.yBounds.y;
         return new Vector2 (
-            Random.Range (-8.0f, 8.0f),
-            Random.Range (-4.0f, 4.0f)
+            Random.Range (minBoundsX, maxBoundsX),
+            Random.Range (minBoundsY, maxBoundsY)
         );
     }
 

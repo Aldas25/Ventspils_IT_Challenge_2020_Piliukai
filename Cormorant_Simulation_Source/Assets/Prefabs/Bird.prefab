@@ -133,8 +133,8 @@ MonoBehaviour:
   nestBuildingTime: 2
   damagingTime: 1
   birdBabyPrefab: {fileID: 1660590465228684768}
-  timeToBirth: 2
-  timeBeingBaby: 0
+  timeToBirth: 5
+  timeBeingBaby: 4
   timeLeftBeingBaby: 0
   childrenPerParentNum: 2
   hasMate: 0

@@ -27,11 +27,6 @@ public class Tree : MonoBehaviour
         UpdateState(TreeState.Healthy);
     }
 
-    void Update () {
-        if (Input.GetKeyDown (KeyCode.Space))
-            UpdateState (TreeState.Damaged);
-    }
-
     public void Damage (float damage = 10.0f) {
         health -= damage;
 
