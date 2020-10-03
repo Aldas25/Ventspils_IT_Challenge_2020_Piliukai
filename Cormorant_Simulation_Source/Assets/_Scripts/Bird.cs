@@ -5,6 +5,7 @@ using UnityEngine;
 public class Bird : MonoBehaviour
 {
     public enum BirdState {
+        Baby,
         SearchingMate,
         SearchingNest,
         BuildingNest,
@@ -22,9 +23,13 @@ public class Bird : MonoBehaviour
     public float damagingTime = 1.0f;
 
     public GameObject birdBabyPrefab;
-    public Vector2 birthInterval;
+    public float timeToBirth;
+    public float timeBeingBaby;
+    public float timeLeftBeingBaby;
     
-    private float timeLeftToBaby;
+    private float timeLeftToBirth;
+    public int childrenPerParentNum;
+    private int leftChildren;
 
     private GameObject nest;
     private BirdState currentState;
@@ -39,13 +44,19 @@ public class Bird : MonoBehaviour
     public bool hasMate = false;
     private GameObject mate;
 
+    public bool tempIfHasPar = false;
+
     void Start () {
-        UpdateState (BirdState.SearchingMate);
+        if (!tempIfHasPar)
+            UpdateState (BirdState.SearchingMate);
     }
 
     void Update () {
 
         switch(currentState) {
+            case BirdState.Baby:
+                DoBeingBaby (Time.deltaTime);
+                break;
             case BirdState.SearchingNest:
                 DoSearchingNest ();
                 break;
@@ -66,14 +77,26 @@ public class Bird : MonoBehaviour
                 break;
         }
 
-        if (hasMate) {
-            timeLeftToBaby -= Time.deltaTime;
-            if (timeLeftToBaby <= 0.0f) {
-                timeLeftToBaby = Random.Range (birthInterval.x, birthInterval.y);
-                Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity);
+        if (hasMate && leftChildren > 0) {
+            timeLeftToBirth -= Time.deltaTime;
+            if (timeLeftToBirth <= 0.0f) {
+                leftChildren--;
+                timeLeftToBirth = timeToBirth;
+                GameObject birdBaby = Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity);
+                Bird birdComponent = birdBaby.GetComponent<Bird> ();
+                birdComponent.UpdateState (BirdState.Baby);
+                birdComponent.hasMate = false;
+                birdComponent.tempIfHasPar = true;
+                birdComponent.timeLeftBeingBaby = timeBeingBaby;
             }
         }
 
+    }
+
+    private void DoBeingBaby (float timePast) {
+        timeLeftBeingBaby -= timePast;
+        if (timeLeftBeingBaby <= 0.0f)
+            UpdateState (BirdState.SearchingMate);
     }
 
     private void DoSearchingNest () {
@@ -141,6 +164,8 @@ public class Bird : MonoBehaviour
     }
 
     public void UpdateMate (GameObject newMate) {
+        timeLeftToBirth = timeToBirth;
+        leftChildren = childrenPerParentNum;
         hasMate = true;
         mate = newMate;
         ChooseNest ();
@@ -148,6 +173,8 @@ public class Bird : MonoBehaviour
     }
 
     public void UpdateMate (GameObject newMate, GameObject newNest) {
+        timeLeftToBirth = timeToBirth;
+        leftChildren = childrenPerParentNum;
         hasMate = true;
         mate = newMate;
         nest = newNest;
@@ -207,6 +234,9 @@ public class Bird : MonoBehaviour
         currentState = newState;
 
         switch(newState) {
+            case BirdState.Baby:
+
+                break;
             case BirdState.SearchingNest:
                 SetStateToSearchingNest();
                 break;
@@ -246,12 +276,13 @@ public class Bird : MonoBehaviour
     private void ChooseNest () {
         GameObject[] treeObjects = GameObject.FindGameObjectsWithTag("Tree");
 
-        GameObject chosen = null;
+        if (treeObjects.Length == 0)
+            return;
+
+        GameObject chosen = treeObjects[Random.Range(0, treeObjects.Length)];
         foreach (GameObject treeObject in treeObjects) {
             //Debug.Log (gameObject.name + " is choosing nest. " + treeObject.name + " has nest: " + treeObject.GetComponent<Tree> ().hasNest);
-            if (chosen == null)
-                chosen = treeObject;
-            else if (!treeObject.GetComponent<Tree> ().willHaveNest) {
+            if (!treeObject.GetComponent<Tree> ().willHaveNest) {
                 float distToChosen = Distance (gameObject.transform.position, chosen.transform.position);
                 float distToCurTree = Distance (gameObject.transform.position, treeObject.transform.position);
                 if (distToCurTree < distToChosen)
