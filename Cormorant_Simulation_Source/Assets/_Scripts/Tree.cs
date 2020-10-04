@@ -17,7 +17,7 @@ public class Tree : MonoBehaviour
     public Color damagedTreeColor;
 
     private float health = 100.0f; 
-    private TreeState currentState;
+    public TreeState currentState;
     private bool hasNest = false;
     public bool willHaveNest = false;
 

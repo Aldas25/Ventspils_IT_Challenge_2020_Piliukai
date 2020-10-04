@@ -25,6 +25,9 @@ public class UIManager : MonoBehaviour
     void Start () {
         OnBirdCountSliderValueChanged ();
         OnTreeCountSliderValueChanged ();
+        OnChildrenPerBirdSliderValueChanged ();
+        OnBirthTimeSliderValueChanged ();
+        OnBabyTimeSliderValueChanged ();
     }
 
     public void ToggleSimulationState () {

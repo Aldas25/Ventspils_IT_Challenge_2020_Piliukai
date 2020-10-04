@@ -33,7 +33,7 @@ public class Bird : MonoBehaviour
     private bool startedGivingBirth = false;
 
     private GameObject nest;
-    private BirdState currentState;
+    public BirdState currentState;
 
     private Vector2 targetPosition;
 
@@ -95,12 +95,14 @@ public class Bird : MonoBehaviour
                 startedGivingBirth = true;
                 leftChildren--;
                 timeLeftToBirth = timeToBirth;
-                GameObject birdBaby = Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity, simulationManager.birdInstantiateObject);
-                Bird birdComponent = birdBaby.GetComponent<Bird> ();
-                birdComponent.UpdateState (BirdState.Baby);
-                birdComponent.hasMate = false;
-                birdComponent.tempIfHasPar = true;
-                birdComponent.timeLeftBeingBaby = timeBeingBaby;
+                if (simulationManager.CanInstantiate ()) {
+                    GameObject birdBaby = Instantiate (birdBabyPrefab, nest.transform.position, Quaternion.identity, simulationManager.birdInstantiateObject);
+                    Bird birdComponent = birdBaby.GetComponent<Bird> ();
+                    birdComponent.UpdateState (BirdState.Baby);
+                    birdComponent.hasMate = false;
+                    birdComponent.tempIfHasPar = true;
+                    birdComponent.timeLeftBeingBaby = timeBeingBaby;
+                }
             }
         }
 

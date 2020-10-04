@@ -15,6 +15,14 @@ public class SimulationManager : MonoBehaviour
 
     public int treeCount;
     public int birdCount;
+    public int birdLimit = 200;
+
+    public Graph treeGraph;
+    public Graph birdBabyGraph;
+    public Graph birdAdultGraph;
+    public float graphPlottingTime = 0.1f;
+    private float simulationTime = 0.0f;
+    private float leftToPlot = 0.0f;
 
     private bool simulationStarted = false;
 
@@ -27,17 +35,30 @@ public class SimulationManager : MonoBehaviour
     void Start () {
         GenerateField ();
         StopSimulation ();
+
+        birdAdultGraph.maxY = birdLimit;
+        birdBabyGraph.maxY = birdLimit;
     }
-    
-    /*void Update () {
-        if (Input.GetKeyDown (KeyCode.Space)) {
-            ToggleSimulationState ();
+
+    void Update () {
+        if (simulationStarted) {
+            simulationTime += Time.deltaTime;
+            leftToPlot -= Time.deltaTime;
+            if (leftToPlot <= 0.0f) {
+                leftToPlot = graphPlottingTime;
+                treeGraph.AddDot (simulationTime, (float)CountHealthyTrees ());
+                birdBabyGraph.AddDot (simulationTime, (float)CountBabyBirds ());
+                birdAdultGraph.AddDot (simulationTime, (float)CountAdultBirds ());
+            }
         }
-    }*/
+    }
 
     public void GenerateField () {
         GenerateTrees ();
         GenerateBirds ();
+
+        simulationTime = 0.0f;
+        treeGraph.ClearGraph ();
     }
 
     private void GenerateTrees () {
@@ -65,6 +86,42 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
+    public bool CanInstantiate () {
+        return (CountBirds () < birdLimit);
+    }
+
+    private int CountTrees () {
+        return treeInstantiateObject.childCount;
+    }
+
+    private int CountHealthyTrees () {
+        int cnt = 0;
+        foreach (Transform child in treeInstantiateObject) {
+            Tree tree = child.gameObject.GetComponent<Tree> ();
+            if (tree.currentState == Tree.TreeState.Healthy)
+                cnt++;
+        }
+        return cnt;
+    }
+
+    private int CountAdultBirds () {
+        return CountBirds () - CountBabyBirds ();
+    }
+
+    private int CountBabyBirds () {
+        int cnt = 0;
+        foreach (Transform child in birdInstantiateObject) {
+            Bird bird = child.gameObject.GetComponent<Bird> ();
+            if (bird.currentState == Bird.BirdState.Baby)
+                cnt++;
+        }
+        return cnt;
+    }
+
+    private int CountBirds () {
+        return birdInstantiateObject.childCount;
+    }
+
     public void ChangeBirdCount (int newBirdCount) {
         birdCount = newBirdCount;
         GenerateField ();
@@ -73,6 +130,7 @@ public class SimulationManager : MonoBehaviour
 
     public void ChangeTreeCount (int newTreeCount) {
         treeCount = newTreeCount;
+        treeGraph.maxY = treeCount;
         GenerateField ();
         StopSimulation ();
     }
