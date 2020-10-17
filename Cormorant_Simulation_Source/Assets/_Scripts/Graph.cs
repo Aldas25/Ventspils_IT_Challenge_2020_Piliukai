@@ -45,6 +45,7 @@ public class Graph : MonoBehaviour
     }
 
     public void ClearGraph () {
+        moved = 0.0f;
         foreach (Transform child in dotInstantiateObject) {
             Destroy (child.gameObject);
         }

@@ -18,7 +18,12 @@ public class UIManager : MonoBehaviour
     public Slider birthTimeSlider;
     public Slider babyTimeSlider;
 
+    public GameObject infoPanel;
+    public Animator infoAnim;
+
     private SimulationManager simulationManager;
+
+    private bool simulationWasOn = false;
 
     void Awake () {
         simulationManager = gameObject.GetComponent<SimulationManager> ();
@@ -65,11 +70,29 @@ public class UIManager : MonoBehaviour
     }
 
     public void UpdateTimeText (float time) {
-        string str = "";
+        string str = "Time: ";
         if (time < 10) str += "0";
         if (time < 1) str += "0";
         str += time.ToString("#.00");
         timeText.text = str;
+    }
+
+    public void TurnInfoPanel (bool on) {
+        infoPanel.SetActive (on);
+
+        if (on) {
+            simulationWasOn = simulationManager.isSimulationStarted ();
+            simulationManager.StopSimulation ();
+        } else {
+            if (simulationWasOn) {
+                simulationWasOn = false;
+                simulationManager.StartSimulation ();
+            }
+        }
+    }
+
+    public void SlideInfoPanel (bool left) {
+        infoAnim.SetBool ("LeftPanelOn", left);
     }
 
 }

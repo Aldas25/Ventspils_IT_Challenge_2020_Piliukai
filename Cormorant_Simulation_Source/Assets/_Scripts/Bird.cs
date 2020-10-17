@@ -60,6 +60,7 @@ public class Bird : MonoBehaviour
 
     void Start () {
         speed = Random.Range (speedRange.x, speedRange.y);
+        damagingTime += Random.Range (-smallOfset, smallOfset);
 
         if (!tempIfHasPar)
             UpdateState (BirdState.SearchingMate);
