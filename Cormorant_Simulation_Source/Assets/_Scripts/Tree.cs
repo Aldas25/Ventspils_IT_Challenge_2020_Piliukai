@@ -6,15 +6,17 @@ public class Tree : MonoBehaviour
 {
     public enum TreeState {
         Healthy,
-        Damaged
+        Damaged,
+        Dead
     };
 
     public SpriteRenderer spriteRenderer;
     public GameObject nestPrefab;
 
     public float initialHealth = 100.0f;
-    public Color heathyTreeColor;
-    public Color damagedTreeColor;
+    public Sprite heathyTreeSprite;
+    public Sprite damagedTreeSprite;
+    public Sprite deadTreeSprite;
 
     private float health = 100.0f; 
     public TreeState currentState;
@@ -24,13 +26,15 @@ public class Tree : MonoBehaviour
 
     void Start () {
         health = initialHealth;
-        UpdateState(TreeState.Healthy);
+        UpdateState (TreeState.Healthy);
     }
 
     public void Damage (float damage = 10.0f) {
         health -= damage;
 
-        if (health < 25.0f)
+        if (health < 0.0f)
+            UpdateState (TreeState.Dead);
+        else if (health < 40.0f)
             UpdateState (TreeState.Damaged);
 
     }
@@ -41,10 +45,13 @@ public class Tree : MonoBehaviour
 
         switch(newState) {
             case TreeState.Healthy:
-                SetStateToHealthy();
+                SetStateToHealthy ();
                 break;
             case TreeState.Damaged:
-                SetStateToDamaged();
+                SetStateToDamaged ();
+                break;
+            case TreeState.Dead:
+                SetStateToDead ();
                 break;
             default:
                 Debug.Log("Reached unkown state");
@@ -54,12 +61,17 @@ public class Tree : MonoBehaviour
 
     private void SetStateToHealthy () {
         currentState = TreeState.Healthy;
-        spriteRenderer.color = heathyTreeColor;
+        spriteRenderer.sprite = heathyTreeSprite;
     }
 
     private void SetStateToDamaged () {
         currentState = TreeState.Damaged;
-        spriteRenderer.color = damagedTreeColor;
+        spriteRenderer.sprite = damagedTreeSprite;
+    }
+
+    private void SetStateToDead () {
+        currentState = TreeState.Dead;
+        spriteRenderer.sprite = deadTreeSprite;
     }
 
     public void AddNest () {

@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI startSimTextObj;
     public string startSimulationText = "Start";
     public string stopSimulationText = "Stop";
+    
+    public TextMeshProUGUI timeText;
 
     public Slider birdCountSlider;
     public Slider treeCountSlider;
@@ -60,6 +62,14 @@ public class UIManager : MonoBehaviour
 
     public void OnBabyTimeSliderValueChanged () {
         simulationManager.ChangeBabyTime (babyTimeSlider.value);
+    }
+
+    public void UpdateTimeText (float time) {
+        string str = "";
+        if (time < 10) str += "0";
+        if (time < 1) str += "0";
+        str += time.ToString("#.00");
+        timeText.text = str;
     }
 
 }

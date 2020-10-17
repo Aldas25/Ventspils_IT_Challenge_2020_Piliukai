@@ -13,12 +13,12 @@ public class Bird : MonoBehaviour
         FlyingRandom
     };
 
-    public SpriteRenderer spriteRenderer;
-    
-    public Color searchingNestColor;
-    public Color damagingTreeColor;
+    //public SpriteRenderer spriteRenderer;
 
-    public float speed = 1.0f;
+    public Animator animator;
+
+    public Vector2 speedRange;
+    private float speed = 1.0f;
     public float nestBuildingTime = 2.0f;
     public float damagingTime = 1.0f;
 
@@ -43,6 +43,7 @@ public class Bird : MonoBehaviour
     //private bool chosenTargetPos = false;
 
     public bool hasMate = false;
+    public bool givingBirth = false;
     private GameObject mate;
 
     public bool tempIfHasPar = false;
@@ -51,11 +52,15 @@ public class Bird : MonoBehaviour
 
     public bool active = true;
 
+    private float smallOfset = 0.1f;
+
     void Awake () {
         simulationManager = GameObject.FindGameObjectWithTag ("GameController").GetComponent<SimulationManager> ();
     }
 
     void Start () {
+        speed = Random.Range (speedRange.x, speedRange.y);
+
         if (!tempIfHasPar)
             UpdateState (BirdState.SearchingMate);
     }
@@ -89,7 +94,7 @@ public class Bird : MonoBehaviour
                 break;
         }
 
-        if (hasMate && leftChildren > 0) {
+        if (hasMate && givingBirth && leftChildren > 0) {
             timeLeftToBirth -= Time.deltaTime;
             if (timeLeftToBirth <= 0.0f) {
                 startedGivingBirth = true;
@@ -115,6 +120,8 @@ public class Bird : MonoBehaviour
     }
 
     private void DoBeingBaby (float timePast) {
+        animator.SetBool ("Fly", false);
+
         timeLeftBeingBaby -= timePast;
         if (timeLeftBeingBaby <= 0.0f)
             UpdateState (BirdState.SearchingMate);
@@ -134,6 +141,8 @@ public class Bird : MonoBehaviour
     }
 
     private void DoFlyingRandom () {
+        animator.SetBool ("Fly", true);
+
         if (CloseTo (targetPosition))
             UpdateTargetPosition();
 
@@ -188,6 +197,7 @@ public class Bird : MonoBehaviour
         timeLeftToBirth = timeToBirth;
         leftChildren = childrenPerParentNum;
         hasMate = true;
+        givingBirth = true;
         mate = newMate;
         ChooseNest ();
         UpdateState (BirdState.SearchingNest);
@@ -203,6 +213,8 @@ public class Bird : MonoBehaviour
     }
 
     private IEnumerator DamageTree () {
+        animator.SetBool ("Fly", false);
+
         startedDamaginTree = true;
 
         yield return new WaitForSeconds (damagingTime);
@@ -231,6 +243,8 @@ public class Bird : MonoBehaviour
     }
 
     private IEnumerator BuildNest () {
+        animator.SetBool ("Fly", false);
+
         buildingNest = true;
 
         yield return new WaitForSeconds (nestBuildingTime);
@@ -281,12 +295,12 @@ public class Bird : MonoBehaviour
 
     private void SetStateToSearchingNest () {
         //currentState = BirdState.SearchingNest;
-        spriteRenderer.color = searchingNestColor;
+        //spriteRenderer.color = searchingNestColor;
     }
 
     private void SetStateToDamagingTree () {
         //currentState = BirdState.DamagingTree;
-        spriteRenderer.color = damagingTreeColor;
+        //spriteRenderer.color = damagingTreeColor;
     }
 
     private void SetStateToFlyingRandom () {

@@ -28,6 +28,8 @@ public class SimulationManager : MonoBehaviour
 
     private UIManager uiManager;
 
+    private float smallOfset = 0.1f;
+
     void Awake () {
         uiManager = gameObject.GetComponent<UIManager> ();
     }
@@ -43,6 +45,7 @@ public class SimulationManager : MonoBehaviour
     void Update () {
         if (simulationStarted) {
             simulationTime += Time.deltaTime;
+            uiManager.UpdateTimeText (simulationTime);
             leftToPlot -= Time.deltaTime;
             if (leftToPlot <= 0.0f) {
                 leftToPlot = graphPlottingTime;
@@ -58,7 +61,10 @@ public class SimulationManager : MonoBehaviour
         GenerateBirds ();
 
         simulationTime = 0.0f;
+        uiManager.UpdateTimeText (simulationTime);
         treeGraph.ClearGraph ();
+        birdBabyGraph.ClearGraph ();
+        birdAdultGraph.ClearGraph ();
     }
 
     private void GenerateTrees () {
@@ -145,14 +151,14 @@ public class SimulationManager : MonoBehaviour
    public void ChangeBirthTime (float newVal) {
        foreach (Transform birdTransform in birdInstantiateObject) {
             Bird bird = birdTransform.gameObject.GetComponent<Bird> ();
-            bird.timeToBirth = newVal;
+            bird.timeToBirth = newVal + Random.Range(-smallOfset, smallOfset);
         }
    }
 
    public void ChangeBabyTime (float newVal) {
        foreach (Transform birdTransform in birdInstantiateObject) {
             Bird bird = birdTransform.gameObject.GetComponent<Bird> ();
-            bird.timeBeingBaby = newVal;
+            bird.timeBeingBaby = newVal + Random.Range(-smallOfset, smallOfset);
         }
    }
 
