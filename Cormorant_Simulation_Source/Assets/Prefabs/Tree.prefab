@@ -47,7 +47,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 1617434524689525642}
   nestPrefab: {fileID: 688356042048697643, guid: f94cb9da4c980b247a49dae5abf7fe6f, type: 3}
   initialHealth: 100
-  heathyTreeSprite: {fileID: 21300000, guid: 763dd7a587baa7d47ad43d7a274eb0f2, type: 3}
+  heathyTreeSprite: {fileID: 21300000, guid: fa6427f8e7ed43f458a2d5b2098544c0, type: 3}
   damagedTreeSprite: {fileID: 21300000, guid: e1401a01690071b478155f210ab952f1, type: 3}
   deadTreeSprite: {fileID: 21300000, guid: 1c00a055bfeea23448c0efab6a7f8768, type: 3}
   currentState: 0
@@ -78,7 +78,7 @@ Transform:
   m_GameObject: {fileID: 1617434524689525640}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.15, y: 0.15, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 1}
   m_Children: []
   m_Father: {fileID: 1617434524595476851}
   m_RootOrder: 0
@@ -123,12 +123,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 763dd7a587baa7d47ad43d7a274eb0f2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fa6427f8e7ed43f458a2d5b2098544c0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.2, y: 0.2}
+  m_Size: {x: 20, y: 15}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
