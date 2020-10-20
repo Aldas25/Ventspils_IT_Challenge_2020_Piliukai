@@ -40,6 +40,8 @@ public class Bird : MonoBehaviour
     private bool buildingNest = false;
     private bool flownToTargetPos = false;
     private bool startedDamaginTree = false;
+
+    private bool hasNest = true;
     //private bool chosenTargetPos = false;
 
     public bool hasMate = false;
@@ -64,6 +66,8 @@ public class Bird : MonoBehaviour
 
         if (!tempIfHasPar)
             UpdateState (BirdState.SearchingMate);
+        
+        
     }
 
     void Update () {
@@ -95,7 +99,7 @@ public class Bird : MonoBehaviour
                 break;
         }
 
-        if (hasMate && givingBirth && leftChildren > 0) {
+        if (hasNest && hasMate && givingBirth && leftChildren > 0 && (simulationManager.leftNonDeadTrees ())) {
             timeLeftToBirth -= Time.deltaTime;
             if (timeLeftToBirth <= 0.0f) {
                 startedGivingBirth = true;
@@ -131,6 +135,12 @@ public class Bird : MonoBehaviour
     private void DoSearchingNest () {
         if (nest == null)
             ChooseNest ();
+
+        if (!hasNest) {
+            UpdateState (BirdState.FlyingRandom);
+            return;
+        }
+
         FlyTowards (nest.transform.position);
         if (CloseTo (nest.transform.position))
             UpdateState (BirdState.BuildingNest);
@@ -150,7 +160,7 @@ public class Bird : MonoBehaviour
         FlyTowards (targetPosition);
 
         
-        if (flownToTargetPos && CloseTo (nest.transform.position)) {
+        if (hasNest && flownToTargetPos && CloseTo (nest.transform.position)) {
             flownToTargetPos = false;
             UpdateState (BirdState.DamagingTree);
         }
@@ -165,7 +175,9 @@ public class Bird : MonoBehaviour
         if (!hasMate) {
             FindMate ();
             if (!hasMate) {
-                UpdateState (BirdState.SearchingNest);
+               // targetPosition = transform.position;
+                hasNest = false;
+                UpdateState (BirdState.FlyingRandom);
                 return;
             }
         }
@@ -190,6 +202,7 @@ public class Bird : MonoBehaviour
         
         UpdateMate (newMate);
         newMate.GetComponent<Bird> ().UpdateMate (this.gameObject, nest);
+        // if not hasNest, update both birds HasNest to false
 
         //Debug.Log ("Mated: " + this.gameObject + " with " + newMate);
     }
@@ -201,6 +214,13 @@ public class Bird : MonoBehaviour
         givingBirth = true;
         mate = newMate;
         ChooseNest ();
+
+        if (!hasNest) {
+            hasNest = false;
+            UpdateState (BirdState.FlyingRandom);
+            return;
+        }
+
         UpdateState (BirdState.SearchingNest);
     }
 
@@ -210,6 +230,13 @@ public class Bird : MonoBehaviour
         hasMate = true;
         mate = newMate;
         nest = newNest;
+
+        if (newNest == null) {
+            hasNest = false;
+            UpdateState (BirdState.FlyingRandom);
+            return;
+        }
+
         UpdateState (BirdState.SearchingNest);
     }
 
@@ -218,7 +245,9 @@ public class Bird : MonoBehaviour
 
         startedDamaginTree = true;
 
-        yield return new WaitForSeconds (damagingTime);
+        do {
+            yield return new WaitForSeconds (damagingTime);
+        } while (!active);
         nest.GetComponent<Tree> ().Damage ();
 
         UpdateState (BirdState.FlyingRandom);
@@ -238,6 +267,12 @@ public class Bird : MonoBehaviour
             flownToTargetPos = true;
             Debug.Log ("Updated target pos to nest's");
         }*/
+
+        if (!hasNest) {
+            targetPosition = GetRandomPoint ();
+            return;
+        }
+
         targetPosition = nest.transform.position;
         flownToTargetPos = true;
         //Debug.Log ("Updated target pos to nest's");
@@ -248,7 +283,9 @@ public class Bird : MonoBehaviour
 
         buildingNest = true;
 
-        yield return new WaitForSeconds (nestBuildingTime);
+        do{
+            yield return new WaitForSeconds (nestBuildingTime);
+        } while (!active);
         nest.GetComponent<Tree> ().AddNest ();
 
         UpdateState (BirdState.FlyingRandom);
@@ -264,6 +301,8 @@ public class Bird : MonoBehaviour
     private void UpdateState (BirdState newState) {
         if (currentState == newState)
             return;
+
+       // Debug.Log(" Updating state from " + currentState + " to " + newState);
 
         //Debug.Log ("Bird state updated to: " + newState);
 
@@ -315,19 +354,25 @@ public class Bird : MonoBehaviour
         if (treeObjects.Length == 0)
             return;
 
-        GameObject chosen = treeObjects[Random.Range(0, treeObjects.Length)];
+        GameObject chosen = null;
         foreach (GameObject treeObject in treeObjects) {
             //Debug.Log (gameObject.name + " is choosing nest. " + treeObject.name + " has nest: " + treeObject.GetComponent<Tree> ().hasNest);
             if (!treeObject.GetComponent<Tree> ().willHaveNest) {
-                float distToChosen = Distance (gameObject.transform.position, chosen.transform.position);
-                float distToCurTree = Distance (gameObject.transform.position, treeObject.transform.position);
-                if (distToCurTree < distToChosen)
-                    chosen = treeObject; 
+                if (chosen == null)
+                    chosen = treeObject;
+                else {
+                    float distToChosen = Distance (gameObject.transform.position, chosen.transform.position);
+                    float distToCurTree = Distance (gameObject.transform.position, treeObject.transform.position);
+                    if (distToCurTree < distToChosen)
+                        chosen = treeObject; 
+                }
             }
         }
 
-        if (chosen == null)
+        if (chosen == null) {
+            hasNest = false;
             return;
+        }
 
         nest = chosen;
         nest.GetComponent<Tree> ().willHaveNest = true;

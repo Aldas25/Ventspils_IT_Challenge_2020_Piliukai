@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI startSimTextObj;
     public string startSimulationText = "Start";
     public string stopSimulationText = "Stop";
+    public string continueSimulationText = "Continue";
+    public string restartSimulationText = "Restart";
     
     public TextMeshProUGUI timeText;
 
@@ -42,11 +44,22 @@ public class UIManager : MonoBehaviour
     }
 
     public void ChangeSimTextToStart () {
+       // Debug.Log ("in change to start");
         startSimTextObj.text = startSimulationText;
     }
 
     public void ChangeSimTextToStop () {
         startSimTextObj.text = stopSimulationText;
+    }
+
+    public void ChangeSimTextToContinue () {
+        //Debug.Log ("in change to continue");
+        startSimTextObj.text = continueSimulationText;
+    }
+
+    public void ChangeSimTextToRestart () {
+        //Debug.Log ("in change to continue");
+        startSimTextObj.text = restartSimulationText;
     }
 
     public void OnBirdCountSliderValueChanged () {

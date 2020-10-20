@@ -32,16 +32,26 @@ public class SimulationManager : MonoBehaviour
 
     private float smallOfset = 0.1f;
 
+    public float maxSimTime = 60.0f;
+
+    public GameObject playButton;
+    public GameObject pauseButton;
+    public GameObject restartButton;
+
     void Awake () {
         uiManager = gameObject.GetComponent<UIManager> ();
     }
 
     void Start () {
         GenerateField ();
-        StopSimulation ();
+        RestartSimulation ();
 
         birdAdultGraph.maxY = birdLimit;
         birdBabyGraph.maxY = birdLimit;
+
+        /*playButton.SetActive (true);
+        pauseButton.SetActive (false);
+        restartButton.SetActive (false);*/
     }
 
     void Update () {
@@ -56,6 +66,16 @@ public class SimulationManager : MonoBehaviour
                 deadTreeGraph.AddDot (simulationTime, (float)CountDeadTrees ());
                 birdBabyGraph.AddDot (simulationTime, (float)CountBabyBirds ());
                 birdAdultGraph.AddDot (simulationTime, (float)CountAdultBirds ());
+            }
+
+            if (simulationTime >= maxSimTime) {
+                //StopSimulation ();
+                //uiManager.ChangeSimTextToStart ();
+                //playButton.SetActive (false);
+                //pauseButton.SetActive (false);
+                //restartButton.SetActive (true);
+                StopSimulation ();
+                uiManager.ChangeSimTextToRestart ();
             }
         }
     }
@@ -104,6 +124,10 @@ public class SimulationManager : MonoBehaviour
 
     public bool CanInstantiate () {
         return (CountBirds () < birdLimit);
+    }
+
+    public bool leftNonDeadTrees () {
+        return CountTrees () != CountDeadTrees ();
     }
 
     private int CountTrees () {
@@ -161,7 +185,9 @@ public class SimulationManager : MonoBehaviour
     public void ChangeBirdCount (int newBirdCount) {
         birdCount = newBirdCount;
         GenerateField ();
-        StopSimulation ();
+        //if (simulationStarted)
+            StopSimulation ();
+        uiManager.ChangeSimTextToStart ();
     }
 
     public void ChangeTreeCount (int newTreeCount) {
@@ -170,7 +196,9 @@ public class SimulationManager : MonoBehaviour
         damagedTreeGraph.maxY = treeCount;
         deadTreeGraph.maxY = treeCount;
         GenerateField ();
-        StopSimulation ();
+        //if (simulationStarted)
+            StopSimulation ();
+        uiManager.ChangeSimTextToStart ();
     }
 
    public void ChangeChildrenPerBirdNum (int newVal) {
@@ -203,20 +231,42 @@ public class SimulationManager : MonoBehaviour
 
     public void StartSimulation () {
         //Time.timeScale = 1.0f;
+        if (simulationTime >= maxSimTime) {
+            GenerateField ();
+        }
         simulationStarted = true;
         uiManager.ChangeSimTextToStop ();
         foreach (Transform bird in birdInstantiateObject) {
             bird.GetComponent<Bird> ().active = true;
         }
+
+        /*playButton.SetActive (false);
+        pauseButton.SetActive (true);
+        restartButton.SetActive (true);*/
     }
 
     public void StopSimulation () {
         //Time.timeScale = 0.0f;
         simulationStarted = false;
-        uiManager.ChangeSimTextToStart ();
+        uiManager.ChangeSimTextToContinue ();
         foreach (Transform bird in birdInstantiateObject) {
             bird.GetComponent<Bird> ().active = false;
         }
+
+        /*playButton.SetActive (true);
+        pauseButton.SetActive (false);
+        restartButton.SetActive (true);*/
+    }
+
+    public void RestartSimulation () {
+        StopSimulation ();
+        GenerateField ();
+        uiManager.ChangeSimTextToStart ();
+        //Debug.Log (" end of restart function");
+
+        /*playButton.SetActive (true);
+        pauseButton.SetActive (false);
+        restartButton.SetActive (false);*/
     }
 
     List<Vector2> GenerateCoordinates (int count) {

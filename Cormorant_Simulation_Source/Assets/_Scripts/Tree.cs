@@ -29,12 +29,12 @@ public class Tree : MonoBehaviour
         UpdateState (TreeState.Healthy);
     }
 
-    public void Damage (float damage = 10.0f) {
+    public void Damage (float damage = 18.0f) {
         health -= damage;
 
-        if (health < 0.0f)
+        if (health <= 0.0f)
             UpdateState (TreeState.Dead);
-        else if (health < 40.0f)
+        else if (health <= 40.0f)
             UpdateState (TreeState.Damaged);
 
     }
