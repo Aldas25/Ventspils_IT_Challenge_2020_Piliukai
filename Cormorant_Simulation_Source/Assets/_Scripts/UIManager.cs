@@ -95,7 +95,9 @@ public class UIManager : MonoBehaviour
 
         if (on) {
             simulationWasOn = simulationManager.isSimulationStarted ();
+            string tmp = (startSimTextObj.text);
             simulationManager.StopSimulation ();
+            startSimTextObj.text = tmp;
         } else {
             if (simulationWasOn) {
                 simulationWasOn = false;
@@ -106,6 +108,12 @@ public class UIManager : MonoBehaviour
 
     public void SlideInfoPanel (bool left) {
         infoAnim.SetBool ("LeftPanelOn", left);
+        infoAnim.SetBool ("PhotoOn", false);
+    }
+
+    public void SlideInfoPhoto (bool mid) {
+        infoAnim.SetBool ("LeftPanelOn", false);
+        infoAnim.SetBool ("PhotoOn", !mid);
     }
 
 }
